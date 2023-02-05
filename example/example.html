@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="google" content="notranslate" />
+   	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+   	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>DatalistSelectEx | ワクガンス</title>
+	<link rel='shortcut icon' href='/home/images/favicon.ico' />
+	
+    <link href="css/bootstrap-5.0.2-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-5.0.2-dist/font/css/open-iconic.min.css" rel="stylesheet">
+	<link href="css/common2.css" rel="stylesheet">
+	<script src="js/jquery3.js"></script>	<!-- jquery-3.3.1.min.js -->
+    <script src="css/bootstrap-5.0.2-dist/js/bootstrap.bundle.js"></script>
+	<script src="js/DatalistSelectEx.js"></script>
+	<script src="js/script.js"></script>
+
+</head>
+<body>
+<div id="header" ><h1>DatalistSelectEx | ワクガンス</h1></div>
+<div class="container">
+
+
+<h2>Demo</h2>
+<div class="row">
+    <div class="col-6">
+	   <label for="animal_id">絶滅危惧種リスト:</label>
+	</div>
+	
+	<form action="#">
+		<div class="col-6">
+			<div class="input-group">
+				<input type="text" id="animal_id" name="animal_id"  value="99"/>
+				<input list="animal_dlist" id="animal_name" name="animal_name" value="" class="form-control"> 
+				<div class="input-group-append">
+				    <button id="animal_id_clear" class="btn btn-outline-secondary" type="button">×</button>
+				</div>
+				<span id="animal_id_err" class="text-danger"></span>
+	            <datalist id="animal_dlist" ></datalist>
+			</div>
+		</div>
+		<button id="submit_btn" class="btn btn-warning btn-lg" onclick="return onSubmit1()">Submit</button>
+		<div class="text-danger" id="valid_err_msg"></div>
+	</form>
+</div>
+
+
+<div class="yohaku"></div>
+
+<ol class="breadcrumb">
+	<li><a href="/">ホーム</a></li>
+	<li>DatalistSelectEx</li>
+</ol>
+</div><!-- content -->
+<div id="footer">(C) kenji uehara 2023-1-30</div>
+</body>
+</html>
