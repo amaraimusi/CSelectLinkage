@@ -24,53 +24,51 @@
  * - all_category_flg	全カテゴリフラグ	trueにすると、カテゴリSELECTで空を選択した際、主SELECTを全カテゴリの選択肢を表示する。
  * - def_value	初期値
  */
-var CSelectLinkage =function(param){
+class CSelectLinkage {
 	
 	
-	this.param = param;
-	
-	this.opHtmHash = {}; // 選択肢HTMLハッシュテーブル (key:カテゴリ値 , value:選択肢HTML)
-	
-	this.allOpHtm = "" // 全選択HTML
-		
-	this.old_category_v = -1;// 旧カテゴリ値
-	
-	var myself=this; // Instance of myself.
+	constructor(param){
+		this.param = param;
+        console.log(this.param);//■■■□□□■■■□□□
+    
+        this.opHtmHash = {}; // 選択肢HTMLハッシュテーブル (key:カテゴリ値 , value:選択肢HTML)
+        
+        this.allOpHtm = "" // 全選択HTML
+            
+        this.old_category_v = -1;// 旧カテゴリ値
+        
+        //let this=this; // Instance of this.
+        
+        // If Param property is empty, set a value.
+        this.param = this._setParamIfEmpty(this.param);
+        
+        // 選択肢HTMLハッシュテーブルを生成する。
+        this.opHtmHash = this._createHtmlHashTable(this.param);
+        
+        // 全カテゴリフラグがtrueなら全選択HTMLを生成する
+        if(this.param.all_category_flg){
+            this.allOpHtm = this._createAllOptionHtml(this.param);
+        }
+        
+        // 初期値をセットする
+        this._setDefaultValue(this.param);
+        
 
-	/**
-	 * initialized.
-	 */
-	this.constract=function(){
-		
-		// If Param property is empty, set a value.
-		this.param = setParamIfEmpty(this.param);
-		
-		// 選択肢HTMLハッシュテーブルを生成する。
-		this.opHtmHash = createHtmlHashTable(this.param);
-		
-		// 全カテゴリフラグがtrueなら全選択HTMLを生成する
-		if(this.param.all_category_flg){
-			this.allOpHtm = createAllOptionHtml(this.param);
-		}
-		
-		// 初期値をセットする
-		setDefaultValue(this.param);
-		
+        // カテゴリSELECTにチェンジイベントを登録
+        $(this.param.category_select_slt).click(function(e){
+            
+            let category_v=$(this).val();
+            
+            // カテゴリSELECTチェンジイベント
+            this.categorySelectChange(category_v);
 
-		// カテゴリSELECTにチェンジイベントを登録
-		$(myself.param.category_select_slt).click(function(e){
-			
-			var category_v=$(this).val();
-			
-			// カテゴリSELECTチェンジイベント
-			categorySelectChange(category_v);
+        });
+        
+	}
 
-		});
-		
-	};
 	
 	// If Param property is empty, set a value.
-	function setParamIfEmpty(param){
+	_setParamIfEmpty(param){
 		
 		if(param == undefined){
 			param = {};
@@ -130,20 +128,20 @@ var CSelectLinkage =function(param){
 	 * @note
 	 * セットした値に合わせて、主SELECTおよびカテゴリSELECTを更新する。
 	 */
-	this.setValue = function(def_value){
+	setValue(def_value){
 		
 		
-		param = myself.param;
+		param = this.param;
 		
-		var msElm = $(param.main_select_slt); // 主SELECT要素
+		let msElm = $(param.main_select_slt); // 主SELECT要素
 		
 		
 		// デフォルト値からデフォルトカテゴリ値を取得する
-		var def_category_value = null; // デフォルトカテゴリ値
-		var data = param.data;
-		for(var i in data){
-			var ent = data[i];
-			var main_v = ent[param.main_value_field]; // 主値を取得
+		let def_category_value = null; // デフォルトカテゴリ値
+		let data = param.data;
+		for(let i in data){
+			let ent = data[i];
+			let main_v = ent[param.main_value_field]; // 主値を取得
 			
 			// 主値とデフォルト値が一致するなら、そのエンティティのカテゴリ値をデフォルトカテゴリ値として取得する
 			if(main_v == def_value){
@@ -152,7 +150,7 @@ var CSelectLinkage =function(param){
 			}
 		}
 
-		var csElm = $(param.category_select_slt); // カテゴリSELECT要素
+		let csElm = $(param.category_select_slt); // カテゴリSELECT要素
 		
 		// カテゴリSELECTにデフォルトカテゴリ値をセットする
 		if(def_category_value!==null){
@@ -164,10 +162,10 @@ var CSelectLinkage =function(param){
 			// 主SELECTに初期値をセット
 			msElm.val(def_value);
 		}else{
-			setForNone();// 値なしの場合の設定処理
+			this._setForNone();// 値なしの場合の設定処理
 		}
 		
-		myself.old_category_v = def_category_value;
+		this.old_category_v = def_category_value;
 	}
 	
 	
@@ -177,13 +175,13 @@ var CSelectLinkage =function(param){
 	 * @note
 	 * 主SELECTのdata-value属性値に合わせて、主SELECTおよびカテゴリSELECTを更新する。
 	 */
-	this.refresh = function(){
-		var msElm = $(param.main_select_slt); // 主SELECT要素
+	refresh(){
+		let msElm = $(param.main_select_slt); // 主SELECT要素
 		
 		// 主SELECT要素にdata-value属性がセットされているなら、初期値として取得する
-		var def_value = msElm.attr('data-value');
+		let def_value = msElm.attr('data-value');
 
-		myself.setValue(def_value);
+		this.setValue(def_value);
 	};
 	
 	
@@ -194,25 +192,25 @@ var CSelectLinkage =function(param){
 	 * @param param
 	 * @return 選択肢HTMLハッシュテーブル
 	 */
-	function createHtmlHashTable(param){
+	_createHtmlHashTable(param){
 
 		// ３つのフィールド名（主値、カテゴリ値、主表記）をparamから取得する
-		var main_f = param.main_value_field;
-		var category_f = param.category_field;
-		var display_f = param.display_name_field;
+		let main_f = param.main_value_field;
+		let category_f = param.category_field;
+		let display_f = param.display_name_field;
 		
 		// カテゴリごとにデータを分類する
-		var data2 = {}; // データ2【分類済】
-		for(var i in param.data){
-			var ent = param.data[i];
+		let data2 = {}; // データ2【分類済】
+		for(let i in param.data){
+			let ent = param.data[i];
 			
 			// 主値、カテゴリ値、主表記をそれぞれ取得する
-			var main_v = ent[main_f];
-			var category_v = ent[category_f];
-			var display_v = ent[display_f];
+			let main_v = ent[main_f];
+			let category_v = ent[category_f];
+			let display_v = ent[display_f];
 
 			// カテゴリごとに分類
-			var ent2 = {'main_v':main_v,'display_v':display_v};
+			let ent2 = {'main_v':main_v,'display_v':display_v};
 			if(!data2[category_v]){
 				data2[category_v]= [];
 			}
@@ -224,23 +222,23 @@ var CSelectLinkage =function(param){
 		
 		
 		// 未選択オプションを作成
-		var emptyOption = "";
+		let emptyOption = "";
 		if(param.empty){
 			emptyOption = "<option value=''>" + param.empty + "</option>\n";
 		}
 		
-		var hash = {} // 選択肢HTMLハッシュテーブル
+		let hash = {} // 選択肢HTMLハッシュテーブル
 		
 		// 選択肢HTMLハッシュテーブルを作成する
-		for(var category_v in data2){
-			var list = data2[category_v];
+		for(let category_v in data2){
+			let list = data2[category_v];
 		
-			var opHtm = emptyOption; // 選択肢HTML
+			let opHtm = emptyOption; // 選択肢HTML
 			
 			// 選択肢HTMLを作成する
-			for(var i in list){
-				var ent2 = list[i];
-				var display_v = xssSanitaizeEncode(ent2.display_v); // XSSサニタイズ（「<>」記号をエンコードしないと選択肢が消えていしまうバグがある）
+			for(let i in list){
+				let ent2 = list[i];
+				let display_v = this._xssSanitaizeEncode(ent2.display_v); // XSSサニタイズ（「<>」記号をエンコードしないと選択肢が消えていしまうバグがある）
 				opHtm += "<option value='" + ent2.main_v + "'>" + display_v + "</option>\n";
 			}
 			
@@ -252,7 +250,7 @@ var CSelectLinkage =function(param){
 	};
 	
 	//XSSサニタイズエンコード
-	function xssSanitaizeEncode(str){
+	_xssSanitaizeEncode(str){
 		if(typeof str == 'string'){
 			return str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 		}else{
@@ -268,25 +266,25 @@ var CSelectLinkage =function(param){
 	 * @param param
 	 * @return 全選択HTML
 	 */
-	function createAllOptionHtml(param){
+	_createAllOptionHtml(param){
 		// ３つのフィールド名（主値、カテゴリ値、主表記）をparamから取得する
-		var main_f = param.main_value_field;
-		var category_f = param.category_field;
-		var display_f = param.display_name_field;
+		let main_f = param.main_value_field;
+		let category_f = param.category_field;
+		let display_f = param.display_name_field;
 		
 		// 未選択オプションを作成
-		var emptyOption = "";
+		let emptyOption = "";
 		if(param.empty){
 			emptyOption = "<option value=''>" + param.empty + "</option>\n";
 		}
 		
-		var opHtm = emptyOption; // 全選択HTML
-		for(var i in param.data){
-			var ent = param.data[i];
+		let opHtm = emptyOption; // 全選択HTML
+		for(let i in param.data){
+			let ent = param.data[i];
 			
 			// 主値、カテゴリ値、主表記をそれぞれ取得する
-			var main_v = ent[main_f];
-			var display_v = ent[display_f];
+			let main_v = ent[main_f];
+			let display_v = ent[display_f];
 
 			opHtm += "<option value='" + main_v + "'>" + display_v + "</option>\n";
 			
@@ -302,11 +300,11 @@ var CSelectLinkage =function(param){
 	/**
 	 * 初期値をセットする
 	 */
-	function setDefaultValue(param){
+	_setDefaultValue(param){
 		
-		var msElm = $(param.main_select_slt); // 主SELECT要素
+		let msElm = $(param.main_select_slt); // 主SELECT要素
 		
-		var def_value = null; // 初期値
+		let def_value = null; // 初期値
 		
 		// 主SELECT要素にdata-value属性がセットされているなら、初期値として取得する
 		def_value = msElm.attr('data-value');
@@ -318,11 +316,11 @@ var CSelectLinkage =function(param){
 		
 		// ここまでで初期値を取得できなかった場合、処理を抜ける。
 		if(def_value==null){
-			setForNone();// 値なしの場合の設定処理
+			this._setForNone();// 値なしの場合の設定処理
 			return;
 		}
 		
-		myself.setValue(def_value);
+		this.setValue(def_value);
 		
 
 	};
@@ -336,17 +334,17 @@ var CSelectLinkage =function(param){
 	 * カテゴリSELECTチェンジイベント
 	 * @param category_v カテゴリ値
 	 */
-	function categorySelectChange(category_v){
+	categorySelectChange(category_v){
 
-		if(myself.old_category_v==category_v){
+		if(this.old_category_v==category_v){
 			return;
 		}
 		
 		if(category_v == undefined || category_v == ""){
 			
 			// 全カテゴリフラグがtrueなら全選択HTMLをセットする
-			if(myself.param.all_category_flg){
-				$(myself.param.main_select_slt).html(myself.allOpHtm);
+			if(this.param.all_category_flg){
+				$(this.param.main_select_slt).html(this.allOpHtm);
 			}
 			
 		}else{
@@ -354,7 +352,7 @@ var CSelectLinkage =function(param){
 			changeOptionHtml(category_v);
 		}
 		
-		myself.old_category_v = category_v;
+		this.old_category_v = category_v;
 
 		
 	}
@@ -363,26 +361,24 @@ var CSelectLinkage =function(param){
 	 * 主SELECTのoption部分を切り替える
 	 * @param category_v カテゴリ値
 	 */
-	function changeOptionHtml(category_v){
+	changeOptionHtml(category_v){
 		// 選択肢HTMLハッシュテーブルから選択肢HTMLを取得する
-		var opHtml = myself.opHtmHash[category_v];
+		let opHtml = this.opHtmHash[category_v];
 		
 		if(!opHtml){
 			opHtml="";
 		}
 		
 		// 主SELECTのoption部分を切り替える
-		$(myself.param.main_select_slt).html(opHtml);
+		$(this.param.main_select_slt).html(opHtml);
 	}
 	
 	
 	// 値なしの場合の設定処理
-	function setForNone(){
-		if(myself.param.all_category_flg){
-			$(myself.param.main_select_slt).html(myself.allOpHtm);
+	_setForNone(){
+		if(this.param.all_category_flg){
+			$(this.param.main_select_slt).html(this.allOpHtm);
 		}
 	}
 
-	// call constractor method.
-	this.constract();
-};
+}
