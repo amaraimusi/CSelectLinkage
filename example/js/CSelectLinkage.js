@@ -5,23 +5,35 @@
  * @note
  * カテゴリ連動型SELECTはカテゴリSELECTと主SELECTの２つから構成される。
  * カテゴリSELECTで選択を行うと、連動して主SELECTの選択リストはカテゴリに属したリストに切り替わる。
+ *  
+ * -- SELECTの概念を理解してください。 --
  * 
+ * 「data-value」属性を使っている理由。
+ * HTMLのSELECTタグにはそもそもvalue属性は存在しません。
+ * optionのselectedがその役割を果たしますが、初期値をセットするのが面倒という問題があります。
+ * 初期値をセットしやすいようにするため「data-value」を拡張として用意します。
+ * 「data-value」属性に値をセットすれば自動的にその値に該当するoptionへ、selected属性が付与されます。
+ * 
+ * カテゴリSELECTには初期値をセットする概念はありません。
+ * 主SELECTの選択値によってカテゴリSELECTは決定されるからです。
+ * 
+ * versin 1.2系時の解説↓
  * 初期値は主SELECTのdata-value属性にセットする。
  * 例→ <select id="animal_sel" data-value="4" ></select>
  * ※ param.valueに初期値をセットしても良い
  * 
- * @version 1.2.1 refreshおよびsetValueを追加
- * @date 2016-11-11 | 2017-2-8
+ * @version 2.0.0 refreshおよびsetValueを追加
+ * @date 2016-11-11 | 2023-2-6
  * 
  * @param param
  * - main_select_slt	主SELECTのセレクタ	
  * - category_select_slt	カテゴリSELECTのセレクタ	
- * - data	エンティティの配列型データ	
- * - main_value_field	エンティティの主値フィールド名	
- * - category_field	エンティティのカテゴリフィールド名	
- * - display_name_field	エンティティの表記フィールド 	
- * - empty	主SELECTの未選択時の表記名	nullをセットすると未選択項目は表示されない。
- * - all_category_flg	全カテゴリフラグ	trueにすると、カテゴリSELECTで空を選択した際、主SELECTを全カテゴリの選択肢を表示する。
+ * - main_field	主フィールド名。主SELECTのname属性など。
+ * - category_field	カテゴリフィールド名	。カテゴリSELECTのname属性など。
+ * - display_name_field	主フィールドと関連づいた表示名フィールド	
+ * - data   主SELECTのリストで使われるデータです。 main_field, category_field, display_name_fieldで指定されたプロパティで構成されるエンティティの配列です。
+ * - empty	主SELECTの未選択時の表記名	nullをセットすると未選択項目は表示されません。
+ * - all_category_flg	全カテゴリフラグ	trueにすると、カテゴリSELECTで空を選択した際、主SELECTを全カテゴリの選択肢を表示します。
  * - def_value	初期値
  */
 class CSelectLinkage {
@@ -29,8 +41,7 @@ class CSelectLinkage {
 	
 	constructor(param){
 		this.param = param;
-        console.log(this.param);//■■■□□□■■■□□□
-    
+
         this.opHtmHash = {}; // 選択肢HTMLハッシュテーブル (key:カテゴリ値 , value:選択肢HTML)
         
         this.allOpHtm = "" // 全選択HTML
@@ -55,10 +66,10 @@ class CSelectLinkage {
         
 
         // カテゴリSELECTにチェンジイベントを登録
-        $(this.param.category_select_slt).click(function(e){
+        $(this.param.category_select_slt).click(evt => {
             
-            let category_v=$(this).val();
-            
+			let elm = $(evt.currentTarget);
+            let category_v= elm .val();
             // カテゴリSELECTチェンジイベント
             this.categorySelectChange(category_v);
 
@@ -90,8 +101,8 @@ class CSelectLinkage {
 		}
 
 		// エンティティの主値フィールド名
-		if(param['main_value_field'] == undefined){
-			param['main_value_field'] = 'id';
+		if(param['main_field'] == undefined){
+			param['main_field'] = 'id';
 		}
 
 		// エンティティのカテゴリフィールド名
@@ -130,8 +141,7 @@ class CSelectLinkage {
 	 */
 	setValue(def_value){
 		
-		
-		param = this.param;
+		let param = this.param;
 		
 		let msElm = $(param.main_select_slt); // 主SELECT要素
 		
@@ -141,7 +151,7 @@ class CSelectLinkage {
 		let data = param.data;
 		for(let i in data){
 			let ent = data[i];
-			let main_v = ent[param.main_value_field]; // 主値を取得
+			let main_v = ent[param.main_field]; // 主値を取得
 			
 			// 主値とデフォルト値が一致するなら、そのエンティティのカテゴリ値をデフォルトカテゴリ値として取得する
 			if(main_v == def_value){
@@ -157,7 +167,7 @@ class CSelectLinkage {
 			csElm.val(def_category_value);
 			
 			// 主SELECTのoption部分を切り替える
-			changeOptionHtml(def_category_value);
+			this._changeOptionHtml(def_category_value);
 			
 			// 主SELECTに初期値をセット
 			msElm.val(def_value);
@@ -180,6 +190,7 @@ class CSelectLinkage {
 		
 		// 主SELECT要素にdata-value属性がセットされているなら、初期値として取得する
 		let def_value = msElm.attr('data-value');
+		console.log('def_value＝' + def_value);//■■■□□□■■■□□□
 
 		this.setValue(def_value);
 	};
@@ -195,7 +206,7 @@ class CSelectLinkage {
 	_createHtmlHashTable(param){
 
 		// ３つのフィールド名（主値、カテゴリ値、主表記）をparamから取得する
-		let main_f = param.main_value_field;
+		let main_f = param.main_field;
 		let category_f = param.category_field;
 		let display_f = param.display_name_field;
 		
@@ -268,7 +279,7 @@ class CSelectLinkage {
 	 */
 	_createAllOptionHtml(param){
 		// ３つのフィールド名（主値、カテゴリ値、主表記）をparamから取得する
-		let main_f = param.main_value_field;
+		let main_f = param.main_field;
 		let category_f = param.category_field;
 		let display_f = param.display_name_field;
 		
@@ -349,7 +360,7 @@ class CSelectLinkage {
 			
 		}else{
 			// 主SELECTのoption部分を切り替える
-			changeOptionHtml(category_v);
+			this._changeOptionHtml(category_v);
 		}
 		
 		this.old_category_v = category_v;
@@ -361,7 +372,7 @@ class CSelectLinkage {
 	 * 主SELECTのoption部分を切り替える
 	 * @param category_v カテゴリ値
 	 */
-	changeOptionHtml(category_v){
+	_changeOptionHtml(category_v){
 		// 選択肢HTMLハッシュテーブルから選択肢HTMLを取得する
 		let opHtml = this.opHtmHash[category_v];
 		

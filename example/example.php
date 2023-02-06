@@ -1,10 +1,8 @@
 <?php 
-var_dump($_POST);//■■■□□□■■■□□□
-if($_POST){
-	echo "<pre>";
-	var_dump($_POST);//■■■□□□■■■□□□
-	echo "</pre>";
-}
+
+echo "<pre>";
+var_dump($_POST);
+echo "</pre>";
 
 
 ?>
@@ -35,9 +33,9 @@ if($_POST){
 
 <h2>Demo</h2>
 <form action="#" method="post">
-	<select id="animal_sel" name="animal_id"  value="<?php $_POST['animal_id'] ?? 0 ?>"></select>
+	<select id="animal_id" name="animal_id"  data-value="<?php echo $_POST['animal_id'] ?? 0 ?>"></select>
 	
-	<select id="category_a_sel" name="category_id" value="<?php $_POST['category_id'] ?? 0 ?>">
+	<select id="category_id" name="category_id">
 	    <option value="">-- すべて --</option>
 	    <option value="1">哺乳類</option>
 	    <option value="2">爬虫類</option>
