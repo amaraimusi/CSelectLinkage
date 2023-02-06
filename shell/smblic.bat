@@ -1,0 +1,1 @@
+cmd /c mklink /D C:\xampp\htdocs\sample_js_k\CSelectLinkage C:\Users\user\git\CSelectLinkage
