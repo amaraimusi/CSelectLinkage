@@ -190,7 +190,6 @@ class CSelectLinkage {
 		
 		// 主SELECT要素にdata-value属性がセットされているなら、初期値として取得する
 		let def_value = msElm.attr('data-value');
-		console.log('def_value＝' + def_value);//■■■□□□■■■□□□
 
 		this.setValue(def_value);
 	};
