@@ -1,4 +1,3 @@
-let datalistSelectEx1;
 
 $(()=>{
     
@@ -26,17 +25,3 @@ $(()=>{
 });
 
 
-// Submitボタン押下アクション
-function onSubmit1(){
-    
-    $('#valid_err_msg').html('');
-    let err_msg = datalistSelectEx1.checkError();
-    
-    if(err_msg){
-        $('#valid_err_msg').html(err_msg);
-        return false;
-    }
-
-    return true;
-    
-}
